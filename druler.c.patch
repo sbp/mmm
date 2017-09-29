@@ -1,0 +1,59 @@
+--- a/druler.c	2013-01-17 20:03:23.000000000 +0000
++++ b/druler.c	2017-09-29 08:27:02.000000000 +0100
+@@ -140,8 +140,8 @@
+ #define EXISTS_OPER ']'
+ /* Old "universal implication" - now obsolete */
+ #define UNIV_IMPL 'i'
+-/* List of legal variable names - note v,i,o skipped because of operators */
+-#define VAR_LIST "abcdefghjklmnpqrstuwxyz"
++/* List of legal variable names */
++#define VAR_LIST "abcdefghijklmnopqrstuvwxyz"
+ /* MAX_VARS is the length of VAR_LIST */
+ #define MAX_VARS 23
+ /* MAX_STACK is length of longest formula expressed in Polish notation */
+@@ -254,8 +254,36 @@
+ 
+ /******************** Main program *******************************************/
+ 
++void usage()
++{
++    printf("?Error: Usage is druler [ polish | prove ] term\n");
++    exit(1);
++}
++
+ int main(int argc, char *argv[])
+ {
++  if (argc != 3) {
++    usage();
++  }
++
++  if (strcmp(argv[1], "polish") == 0) {
++    printf("%s\n", toPolish(argv[2]));
++  } else if (strcmp(argv[1], "prove") == 0) {
++    for (int i = 0; i < MAX_AXIOMS; i++) {
++      axiom[i] = "";
++    }
++    axiom[1] = toPolish("(p>(q>p))");
++    axiom[2] = toPolish("((p>(q>r))>((p>q)>(p>r)))");
++    axiom[3] = toPolish("((~p>~q)>(q>p))");
++    axioms = 3;
++    printf("%s\n", dProof(argv[2]));
++  } else {
++    usage();
++  }
++}
++
++int drule(int argc, char *argv[])
++{
+ 
+   vstring str1 = "";
+   vstring str2 = "";
+@@ -425,7 +453,7 @@
+     let(&theoremComment, "; ! Result of proof");
+     let(&printedProvedTheorem, edit(printedProvedTheorem, 32)); /* uppercase */
+ 
+-    if (i == i) {   /* Change to != if "real" theorem not wanted */
++    if (1) {   /* Change to 0 if "real" theorem not wanted */
+       for (i = 1; i <= strlen(printedProvedTheorem); i++) {
+         if (printedProvedTheorem[i - 1] != '>') {
+           let(&theoremBody, cat(theoremBody, mid(printedProvedTheorem, i, 1),
